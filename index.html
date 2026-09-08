@@ -114,6 +114,8 @@ input,textarea,select{font-family:inherit}
 /* ── MAIN CONTENT WRAPPER ───────────────────────────────────── */
 .view{display:none;padding-bottom:80px}
 .view.active{display:block}
+/* Tareas tiene add-bar encima del nav → necesita más espacio abajo */
+#viewTareas{padding-bottom:160px}
 
 /* ── CATEGORY NAV (Tareas) ──────────────────────────────────── */
 .cat-scroll-wrap{
@@ -489,6 +491,27 @@ input,textarea,select{font-family:inherit}
   border-radius:9px;padding:7px 12px;font-size:15px;color:var(--text-1);outline:none;
 }
 
+/* ── NOTIFICATION BANNER ─────────────────────────────────────── */
+.notif-banner{
+  display:flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,#5B4EE8,#7C3AED);
+  color:#fff;padding:12px 16px;
+  animation:slideDown .3s ease;
+}
+@keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.notif-banner[hidden]{display:none}
+.notif-banner-icon{font-size:22px;flex-shrink:0}
+.notif-banner-text{flex:1;font-size:13px;font-weight:600;line-height:1.35}
+.notif-banner-sub{font-size:11px;opacity:.85;font-weight:400}
+.notif-banner-btn{
+  background:rgba(255,255,255,0.22);border:1.5px solid rgba(255,255,255,0.4);
+  color:#fff;padding:7px 14px;border-radius:20px;font-size:12.5px;font-weight:700;
+  flex-shrink:0;white-space:nowrap;
+}
+.notif-banner-close{
+  opacity:.7;font-size:18px;flex-shrink:0;padding:4px;
+}
+
 /* ── TOAST ───────────────────────────────────────────────────── */
 .toast{
   position:fixed;bottom:80px;left:50%;
@@ -519,6 +542,17 @@ input,textarea,select{font-family:inherit}
     </div>
   </div>
 </header>
+
+<!-- Notification permission banner -->
+<div id="notifBanner" class="notif-banner" hidden>
+  <div class="notif-banner-icon">🔔</div>
+  <div class="notif-banner-text">
+    Activar recordatorios
+    <div class="notif-banner-sub">Recibe aviso diario con tus pendientes</div>
+  </div>
+  <button class="notif-banner-btn" id="notifBannerBtn">Activar</button>
+  <button class="notif-banner-close" id="notifBannerClose">✕</button>
+</div>
 
 <!-- TAREAS VIEW -->
 <div id="viewTareas" class="view active">
@@ -705,18 +739,37 @@ input,textarea,select{font-family:inherit}
 <div class="overlay" id="notifOverlay" hidden>
   <div class="sheet">
     <div class="sheet-title">Recordatorio diario</div>
-    <div class="notif-row">
-      <div class="n-dot off" id="nDot"></div>
-      <span id="nText">Sin permisos</span>
-    </div>
+
+    <!-- Hora -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
       <div class="field-label" style="margin-bottom:0">Hora del aviso</div>
       <input class="time-pick" type="time" id="notifTime" value="21:00">
     </div>
+
+    <!-- Notif en app (mientras Chrome activo) -->
+    <div class="notif-row">
+      <div class="n-dot off" id="nDot"></div>
+      <span id="nText">Sin permisos</span>
+    </div>
     <button class="sheet-btn primary" id="notifActionBtn">Activar notificaciones</button>
-    <button class="sheet-btn" id="testNotifBtn" style="background:var(--surface-2);color:var(--text-1);display:none">🔔 Enviar notificación de prueba</button>
-    <div class="sheet-sub" id="notifHint" style="margin-top:4px;margin-bottom:12px"></div>
-    <button class="sheet-btn secondary" id="closeNotifBtn">Cerrar</button>
+    <button class="sheet-btn" id="testNotifBtn" style="background:var(--surface-2);color:var(--text-1);display:none">🔔 Probar notificación ahora</button>
+    <div class="sheet-sub" id="notifHint" style="margin-top:4px;margin-bottom:16px"></div>
+
+    <!-- ntfy — notificaciones aunque Chrome esté cerrado -->
+    <div style="border-top:1px solid var(--border);padding-top:14px;margin-bottom:4px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:4px">📲 Notificación aunque la app esté cerrada</div>
+      <div class="sheet-sub" style="margin-bottom:10px">Instala la app <strong>ntfy</strong> (gratis, Play Store) y suscríbete a tu canal privado. Recibirás el aviso aunque tengas todo cerrado.</div>
+      <div id="ntfyRow" style="display:none">
+        <div style="background:var(--surface-2);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:12px;word-break:break-all;color:var(--text-2)" id="ntfyTopicUrl"></div>
+        <button class="sheet-btn" id="ntfyOpenBtn" style="background:var(--accent);color:#fff">Abrir en ntfy →</button>
+        <div class="sheet-sub" style="margin-top:6px">En la app ntfy toca el "+" y escribe tu canal, o pulsa el botón de arriba para abrirlo directo.</div>
+      </div>
+      <div id="ntfySetupRow">
+        <button class="sheet-btn" id="ntfySetupBtn" style="background:var(--surface-2);color:var(--text-1)">⚙️ Generar mi canal ntfy</button>
+      </div>
+    </div>
+
+    <button class="sheet-btn secondary" id="closeNotifBtn" style="margin-top:8px">Cerrar</button>
   </div>
 </div>
 
@@ -753,6 +806,7 @@ let S = {
   activeTaskCat: 'compras',
   notifTime: '21:00',
   lastNotifDay: null,
+  ntfyTopic: null,   // set when user generates their ntfy channel
 };
 
 // Calendar state
@@ -786,8 +840,10 @@ function load() {
 
 function save() {
   try { localStorage.setItem('midia_v3', JSON.stringify(S)); } catch(e) {}
-  // Keep SW in sync so background notifications have fresh data
+  // Keep SW in sync (foreground check)
   if (typeof syncCfgToSW === 'function') setTimeout(syncCfgToSW, 200);
+  // Sync ntfy config to DB so scheduled task knows when/where to push
+  if (typeof syncNtfyToDB === 'function') setTimeout(syncNtfyToDB, 400);
 }
 
 function seedDemo() {
@@ -1458,7 +1514,7 @@ function updateNotifUI() {
     btn.textContent='✅ Notificaciones activas';
     btn.style.opacity='0.6'; btn.onclick=null;
     testBtn.style.display='block';
-    if(hint) hint.textContent='La notificación saltará a la hora indicada aunque la pantalla esté en reposo. Si Chrome está cerrado del todo puede no llegar.';
+    if(hint) hint.textContent='✅ La notificación saltará a la hora indicada aunque la app esté en segundo plano. Funciona siempre que Chrome esté activo en el dispositivo.';
   } else if (perm==='denied') {
     dot.className='n-dot off';
     text.textContent='Bloqueadas en el navegador';
@@ -1481,6 +1537,11 @@ async function requestNotif() {
   if (!('Notification' in window)) { toast('Tu navegador no admite notificaciones'); return; }
   await Notification.requestPermission();
   updateNotifUI();
+  if (Notification.permission === 'granted') {
+    if (swReg) await subscribePush(swReg);
+    else await syncSubToDB(null);
+    syncCfgToSW();
+  }
 }
 
 function sendNotif(force=false) {
@@ -1502,15 +1563,30 @@ function sendNotif(force=false) {
 }
 
 function startNotifChecker() {
+  // Update 🔔 header button to show active state
+  function updateBell() {
+    const btn = document.getElementById('notifBtn');
+    if (!btn) return;
+    if ('Notification' in window && Notification.permission === 'granted') {
+      btn.style.color = 'var(--accent)';
+      btn.title = `Recordatorio a las ${S.notifTime}`;
+    } else {
+      btn.style.color = '';
+      btn.title = 'Recordatorio';
+    }
+  }
+  updateBell();
   setInterval(()=>{
     if (Notification.permission!=='granted') return;
+    updateBell();
     const now=new Date();
     const [h,m]=S.notifTime.split(':').map(Number);
     const today=now.toDateString();
     const cur=now.getHours()*60+now.getMinutes();
     const tgt=h*60+m;
-    if (cur>=tgt&&cur<tgt+10&&S.lastNotifDay!==today) sendNotif();
-  },30000); // check every 30s instead of 60s
+    // Fire within a 15-minute window after target time
+    if (cur>=tgt&&cur<tgt+15&&S.lastNotifDay!==today) sendNotif();
+  },15000); // check every 15s
 }
 
 // ── PWA ─────────────────────────────────────────────────────────────
@@ -2118,6 +2194,7 @@ function bindEvents() {
   document.getElementById('notifBtn').addEventListener('click',()=>{
     document.getElementById('notifTime').value=S.notifTime;
     updateNotifUI();
+    updateNtfyUI();
     document.getElementById('notifOverlay').removeAttribute('hidden');
   });
   document.getElementById('closeNotifBtn').addEventListener('click',()=>{
@@ -2128,10 +2205,37 @@ function bindEvents() {
   });
   document.getElementById('notifTime').addEventListener('change',e=>{
     S.notifTime=e.target.value; save(); updateNotifUI(); toast('Hora guardada');
+    syncNtfyToDB(); // update scheduled task target time
+  });
+
+  // ntfy buttons
+  const ntfySetupBtn = document.getElementById('ntfySetupBtn');
+  const ntfyOpenBtn = document.getElementById('ntfyOpenBtn');
+  if (ntfySetupBtn) ntfySetupBtn.addEventListener('click', setupNtfy);
+  if (ntfyOpenBtn) ntfyOpenBtn.addEventListener('click',()=>{
+    if (S.ntfyTopic) window.open(ntfyTopicUrl(S.ntfyTopic), '_blank');
   });
   document.getElementById('testNotifBtn').addEventListener('click',()=>{
     sendNotif(true);
     toast('¡Notificación enviada!');
+  });
+
+  // Notification banner
+  const bannerBtn = document.getElementById('notifBannerBtn');
+  const bannerClose = document.getElementById('notifBannerClose');
+  if (bannerBtn) bannerBtn.addEventListener('click', requestNotifFromBanner);
+  if (bannerClose) bannerClose.addEventListener('click',()=>{
+    hideNotifBanner();
+    localStorage.setItem(BANNER_DISMISSED_KEY,'1');
+  });
+
+  // Check missed notification when user returns to app + refresh DB
+  document.addEventListener('visibilitychange',()=>{
+    if (document.visibilityState==='visible') {
+      checkMissedNotif();
+      syncCfgToSW();
+      syncNtfyToDB();
+    }
   });
 
   // Add gasto
@@ -2245,6 +2349,65 @@ function bindEvents() {
 
 // ── SERVICE WORKER (background notifications) ────────────────────────
 let swReg = null;
+let pushSub = null;
+
+// ── WEB PUSH (VAPID) ─────────────────────────────────────────────────
+const VAPID_PUBLIC = 'BNYuBSnT18OzfPbKjwcMi5AqifgJzFJB9qVXRssbOLdg8juMPCpEqkMzXgtENi_q_qbj93IDJRnr-nQCppT_lY8';
+
+function urlB64ToUint8(base64) {
+  const pad = '='.repeat((4 - base64.length % 4) % 4);
+  const b64 = (base64 + pad).replace(/-/g,'+').replace(/_/g,'/');
+  const raw = atob(b64);
+  return Uint8Array.from([...raw].map(c=>c.charCodeAt(0)));
+}
+
+function getDeviceId() {
+  let id = localStorage.getItem('midia_device_id');
+  if (!id) {
+    id = 'dev_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem('midia_device_id', id);
+  }
+  return id;
+}
+
+async function subscribePush(reg) {
+  try {
+    // Try to reuse existing subscription first
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlB64ToUint8(VAPID_PUBLIC)
+      });
+    }
+    pushSub = sub;
+    await syncSubToDB(sub);
+    return sub;
+  } catch(e) {
+    console.warn('Push subscribe failed (SW scope issue or unsupported):', e.message);
+    // Still sync config so scheduled task can try later
+    await syncSubToDB(null);
+  }
+}
+
+async function syncSubToDB(sub) {
+  if (!window.claude?.db) return;
+  const pending = pendingAll();
+  const total = Object.values(pending).reduce((a,v)=>a+v.tasks.length,0);
+  const lines = Object.values(pending)
+    .filter(({tasks})=>tasks.length)
+    .map(({cat,tasks})=>`${cat.emoji} ${cat.name}: ${tasks.map(t=>t.text).join(', ')}`);
+  try {
+    await window.claude.db.set('push_subs', getDeviceId(), {
+      sub: sub ? sub.toJSON() : null,
+      notifTime: S.notifTime,
+      lastNotified: S.lastNotifDay || null,
+      pendingCount: total,
+      pendingLines: lines,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch(e) {}
+}
 
 async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
@@ -2252,17 +2415,24 @@ async function registerSW() {
     swReg = await navigator.serviceWorker.register('./service-worker.js', { scope: './' });
     await navigator.serviceWorker.ready;
 
-    // Periodic Background Sync
+    // If permission already granted → subscribe to push right away
+    if (Notification.permission === 'granted') {
+      await subscribePush(swReg);
+    }
+
+    // Periodic Background Sync (Android Chrome with high engagement)
     if ('periodicSync' in swReg) {
       try {
         const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
         if (status.state === 'granted') {
-          await swReg.periodicSync.register('midia-reminder', { minInterval: 20 * 60 * 1000 });
+          await swReg.periodicSync.register('midia-reminder', { minInterval: 15 * 60 * 1000 });
         }
       } catch(e) {}
     }
     syncCfgToSW();
-  } catch(e) {}
+  } catch(e) {
+    swReg = null;
+  }
 }
 
 function syncCfgToSW() {
@@ -2282,16 +2452,109 @@ function syncCfgToSW() {
   });
 }
 
-// ── NOTIFICATION AUTO-REQUEST ────────────────────────────────────────
-function autoRequestNotif() {
-  if (!('Notification' in window)) return;
-  if (Notification.permission === 'default') {
-    setTimeout(async () => {
-      await Notification.requestPermission();
-      updateNotifUI();
-      if (Notification.permission === 'granted') syncCfgToSW();
-    }, 1500);
+// ── NTFY (push cuando Chrome está cerrado) ────────────────────────────
+function ntfyGenTopic() {
+  // Generate a random private topic name
+  const rand = () => Math.random().toString(36).slice(2);
+  return 'midia-' + rand() + rand();
+}
+
+function ntfyTopicUrl(topic) {
+  return 'https://ntfy.sh/' + topic;
+}
+
+function setupNtfy() {
+  if (!S.ntfyTopic) {
+    S.ntfyTopic = ntfyGenTopic();
+    save();
   }
+  updateNtfyUI();
+  syncNtfyToDB();
+  toast('✅ Canal ntfy creado');
+}
+
+function updateNtfyUI() {
+  const row = document.getElementById('ntfyRow');
+  const setupRow = document.getElementById('ntfySetupRow');
+  const urlEl = document.getElementById('ntfyTopicUrl');
+  if (!row) return;
+  if (S.ntfyTopic) {
+    row.style.display = 'block';
+    setupRow.style.display = 'none';
+    if (urlEl) urlEl.textContent = ntfyTopicUrl(S.ntfyTopic);
+  } else {
+    row.style.display = 'none';
+    setupRow.style.display = 'block';
+  }
+}
+
+async function syncNtfyToDB() {
+  if (!S.ntfyTopic) return;
+  if (!window.claude?.db) return;
+  const pending = pendingAll();
+  const total = Object.values(pending).reduce((a,v)=>a+v.tasks.length,0);
+  const lines = Object.values(pending)
+    .filter(({tasks})=>tasks.length)
+    .map(({cat,tasks})=>`${cat.emoji} ${cat.name}: ${tasks.map(t=>t.text).join(', ')}`);
+  try {
+    await window.claude.db.set('ntfy_config', 'main', {
+      ntfyTopic: S.ntfyTopic,
+      notifTime: S.notifTime,
+      lastNotified: S.lastNotifDay || null,
+      pendingCount: total,
+      pendingLines: lines,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch(e) {}
+}
+
+// ── NOTIFICATION BANNER ───────────────────────────────────────────────
+const BANNER_DISMISSED_KEY = 'midia_notif_banner_dismissed';
+
+function showNotifBanner() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'granted') return;
+  if (Notification.permission === 'denied') return;
+  if (localStorage.getItem(BANNER_DISMISSED_KEY)) return;
+  const banner = document.getElementById('notifBanner');
+  if (banner) banner.removeAttribute('hidden');
+}
+
+function hideNotifBanner() {
+  const banner = document.getElementById('notifBanner');
+  if (banner) banner.setAttribute('hidden', '');
+}
+
+async function requestNotifFromBanner() {
+  if (!('Notification' in window)) return;
+  const result = await Notification.requestPermission();
+  hideNotifBanner();
+  updateNotifUI();
+  if (result === 'granted') {
+    if (swReg) await subscribePush(swReg);
+    else await syncSubToDB(null);
+    syncCfgToSW();
+    toast('🔔 Notificaciones activadas');
+  } else {
+    toast('Puedes activarlas desde el botón 🔔 del menú');
+  }
+}
+
+// Also check missed notification when app regains focus
+function checkMissedNotif() {
+  if (Notification.permission !== 'granted') return;
+  const now = new Date();
+  const [h, m] = S.notifTime.split(':').map(Number);
+  const today = now.toDateString();
+  const cur = now.getHours() * 60 + now.getMinutes();
+  const tgt = h * 60 + m;
+  // If we're past the target time today and haven't notified yet → send now
+  if (cur >= tgt && S.lastNotifDay !== today) sendNotif();
+}
+
+function autoRequestNotif() {
+  // Replace silent auto-request with visible banner after short delay
+  setTimeout(showNotifBanner, 2000);
 }
 
 // ── INIT ─────────────────────────────────────────────────────────────

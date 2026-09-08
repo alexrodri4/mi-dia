@@ -30,6 +30,22 @@ async function dbSet(k,v){
 self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
 
+// Real Web Push event — triggered by server when app is closed
+self.addEventListener('push',event=>{
+  let data={title:'Mi Día — Pendientes de hoy',body:''};
+  try{ data={...data,...event.data.json()}; }catch(e){}
+  event.waitUntil(
+    self.registration.showNotification(data.title,{
+      body:data.body,
+      tag:'midia-daily',
+      renotify:true,
+      icon:'https://cdn.jsdelivr.net/npm/twemoji@14/assets/72x72/1f4cb.png',
+      badge:'https://cdn.jsdelivr.net/npm/twemoji@14/assets/72x72/1f514.png',
+      vibrate:[200,100,200],
+    })
+  );
+});
+
 self.addEventListener('periodicsync',event=>{
   if(event.tag==='midia-reminder') event.waitUntil(checkAndNotify());
 });
@@ -48,7 +64,7 @@ async function checkAndNotify(){
     body: cfg.pendingText,
     tag:'midia-daily',
     renotify:true,
-    icon:'./icons/icon-192.png',
+    icon:'https://cdn.jsdelivr.net/npm/twemoji@14/assets/72x72/1f4cb.png',
   });
   await dbSet('cfg',{...cfg,lastNotifDay:today});
 }
