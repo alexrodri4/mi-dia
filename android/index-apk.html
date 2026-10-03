@@ -947,4 +947,24 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden){try{typeo
 })();
 </script>
 
-</body></html>
+<script>
+(function(){
+  const fab=document.getElementById('voiceFab');
+  if(!fab)return;
+  let dragged=false;
+  fab.addEventListener('pointermove',function(){
+    if(fab.classList.contains('fab-active') && parseFloat(fab.style.top||'0')>window.innerHeight*.3) dragged=true;
+  },{capture:true,passive:true});
+  fab.addEventListener('pointerup',function(){
+    if(!dragged)return;
+    const top=parseFloat(fab.style.top||'0');
+    if(top>window.innerHeight*.3 && !fab.classList.contains('listening')){
+      setTimeout(function(){
+        if(fab.classList.contains('fab-active') && !fab.classList.contains('listening'))
+          fab.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,button:0,clientY:top}));
+      },550);
+    }
+    dragged=false;
+  },{capture:true});
+})();
+</script></body></html>
