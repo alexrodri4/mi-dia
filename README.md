@@ -1,7 +1,20 @@
-# Mi Día — copia mejorada
+# Mi Día
 
-Versión basada directamente en `mi-dia-repo`, con su archivo `index.html` y toda su lógica intactos.
+App personal de tareas, recordatorios y gastos, con Claude (IA) integrado.
 
-La única capa añadida es `custom-icons.js`: reemplaza los iconos visuales de interfaz por SVG propios sin modificar el estado, los eventos, el almacenamiento local ni los flujos de tareas, gastos y calendario.
+- `index.html` — la app web completa (misma versión que el artefacto de Claude).
+- `apk/MiDia.apk` — app de Android (`com.alexrodri.midia`, Android 10+).
+- `android/` — código del proyecto Android (WebView + puente nativo) y `build_apk.sh` para compilarlo sin Gradle.
+- `src-ia/` — las capas añadidas: `midia-ai.js/.css` (chat con Claude, escanear tickets, informe semanal), `apk-shim.js` (Claude con tu clave de API y voz nativa en la APK) y `apk-native.js` (notificaciones, widget, botón atrás).
 
-`dashboard-style.js` añade una portada inspirada en el referente: cabecera azul, cuatro tarjetas de resumen, tareas expandibles y accesos a gastos, eventos y recordatorios. Sus botones conducen a las vistas funcionales originales; la navegación de Tareas devuelve al inicio.
+## Funciones de IA
+- Chat con Claude que conoce tus tareas, recordatorios y gastos y puede crear, tachar o borrar cosas (siempre con confirmación).
+- Escanear un ticket con la cámara y apuntar el gasto.
+- Informe semanal: bien, a mejorar, dinero y consejo.
+- Asistente por voz.
+
+En el artefacto Claude usa tu cuenta de claude.ai; en la APK, tu clave de API (Más → Claude (IA)). En GitHub Pages la IA no está disponible.
+
+## APK
+Notificaciones reales (tareas que vencen, recordatorios, víspera de fechas anuales, resumen diario) y widget de pantalla de inicio.
+La clave de firma (`midia-release.keystore`) **no** está en el repositorio: hace falta para publicar actualizaciones que se instalen encima.

@@ -1,0 +1,73 @@
+/* ===== Claude (IA) en Mi Día ===== */
+.cl-logo{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:11px;background:linear-gradient(135deg,#D97757,#C15F3C);color:#fff;font-size:17px;flex:none;text-shadow:none}
+.hdr-btn.cl-hdr{color:#fff;background:linear-gradient(135deg,#D97757,#C15F3C);border-color:transparent;font-size:17px;text-shadow:none}
+.cl-view{position:fixed;inset:0;z-index:70;background:var(--bg);display:flex;flex-direction:column;max-width:480px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 0;text-shadow:none}
+.cl-view[hidden]{display:none}
+.cl-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.cl-head h2{font-size:19px;font-weight:800;color:var(--text-1);margin:0;line-height:1.1}
+.cl-head .sub{font-size:11.5px;color:var(--text-2)}
+.cl-head .sp{flex:1}
+.cl-sbtn{height:34px;padding:0 12px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);color:var(--text-1);font-size:13px;font-weight:600}
+.cl-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 0 12px;-webkit-overflow-scrolling:touch}
+.cl-msg{display:flex}
+.cl-msg.me{justify-content:flex-end}
+.cl-b{max-width:86%;padding:10px 13px;border-radius:16px;font-size:14.5px;line-height:1.45;background:var(--surface-solid);border:1px solid var(--border);color:var(--text-1)}
+.cl-msg.me .cl-b{background:var(--accent-grad);color:#fff;border-color:transparent;border-bottom-right-radius:6px}
+.cl-msg.bot .cl-b{border-bottom-left-radius:6px}
+.cl-b p{margin:0 0 6px}.cl-b p:last-child{margin:0}.cl-b ul{margin:4px 0 6px;padding-left:18px}.cl-b li{margin:2px 0}
+.cl-dots{display:flex;gap:5px;padding:14px}
+.cl-dots i{width:8px;height:8px;border-radius:50%;background:var(--text-3);animation:cldot 1s infinite}
+.cl-dots i:nth-child(2){animation-delay:.15s}.cl-dots i:nth-child(3){animation-delay:.3s}
+@keyframes cldot{0%,100%{opacity:.25}50%{opacity:1}}
+.cl-act{max-width:92%;background:var(--surface-solid);border:1.5px solid #D97757;border-radius:14px;padding:11px 13px;font-size:13.5px;color:var(--text-1);line-height:1.5}
+.cl-act.ran{border-color:var(--success)}.cl-act.cancel{border-color:var(--border);opacity:.7}
+.cl-act .eb{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#D97757;margin-bottom:6px}
+.cl-act.ran .eb{color:var(--success)}.cl-act.cancel .eb{color:var(--text-3)}
+.cl-act label{display:flex;gap:9px;align-items:flex-start;padding:6px 0;border-top:1px solid var(--border)}
+.cl-act label:first-of-type{border-top:none}
+.cl-act input{margin-top:3px;width:16px;height:16px;flex:none;accent-color:#D97757}
+.cl-act .row{display:flex;gap:8px;margin-top:8px}
+.cl-act .row button{flex:1;height:38px;border-radius:10px;font-weight:700;font-size:13.5px}
+.cl-ok{background:linear-gradient(135deg,#D97757,#C15F3C);color:#fff}
+.cl-no{background:var(--surface-2);color:var(--text-1)}
+.cl-err{background:rgba(229,62,62,.12);border:1px solid rgba(229,62,62,.35);color:var(--text-1);border-radius:10px;padding:8px 12px;font-size:13px}
+.cl-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+.cl-chips::-webkit-scrollbar{display:none}
+.cl-chip{flex:none;border:1px solid var(--border);background:var(--surface-2);color:var(--text-1);border-radius:99px;padding:7px 12px;font-size:12.5px;font-weight:600}
+.cl-bar{display:flex;gap:8px;align-items:flex-end;padding:0 0 calc(12px + env(safe-area-inset-bottom,0px))}
+.cl-bar textarea{flex:1;min-height:44px;max-height:120px;border-radius:22px;border:1.5px solid var(--border);background:var(--surface-2);color:var(--text-1);padding:11px 16px;font-size:15px;resize:none;outline:0;font-family:inherit}
+.cl-bar textarea:focus{border-color:#D97757}
+.cl-rbtn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:none;font-size:18px}
+.cl-send{background:linear-gradient(135deg,#D97757,#C15F3C);color:#fff}
+.cl-mic{background:var(--surface-2);border:1px solid var(--border);color:var(--text-1)}
+.cl-mic.on{background:#E53E3E;color:#fff;border-color:#E53E3E;animation:clpulse 1.2s infinite}
+@keyframes clpulse{50%{box-shadow:0 0 0 8px rgba(229,62,62,.18)}}
+/* página Claude en Más */
+.cl-card{background:var(--surface-2);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:10px;color:var(--text-1)}
+.cl-card h4{margin:0 0 4px;font-size:14.5px;font-weight:800}
+.cl-card .d{font-size:12px;color:var(--text-2);line-height:1.5}
+.cl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.cl-tile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;background:var(--surface-2);border:1px solid var(--border);border-radius:16px;padding:13px 13px;color:var(--text-1)}
+.cl-tile b{font-size:13.5px}.cl-tile span{font-size:11.5px;color:var(--text-2);line-height:1.35}
+.cl-tile .e{font-size:22px}
+.cl-report{font-size:13.5px;line-height:1.55;margin-top:8px}
+.cl-report p{margin:0 0 6px}
+.cl-btn{height:38px;padding:0 14px;border-radius:10px;font-weight:700;font-size:13px;background:var(--surface);border:1px solid var(--border);color:var(--text-1)}
+.cl-btn.pri{background:linear-gradient(135deg,#D97757,#C15F3C);color:#fff;border-color:transparent}
+.cl-btn.dan{color:#E53E3E}
+.cl-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.cl-bar2{height:8px;background:var(--surface);border-radius:99px;overflow:hidden;margin:8px 0 6px}
+.cl-bar2 i{display:block;height:100%;border-radius:99px}
+.cl-u3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center;margin-top:6px}
+.cl-u3 b{display:block;font-size:16px}.cl-u3 span{font-size:11px;color:var(--text-2)}
+.cl-pill{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;background:rgba(22,163,74,.15);color:#16A34A}
+.cl-pill.off{background:var(--surface);color:var(--text-3)}
+/* escaneo de ticket */
+.cl-scan{position:relative;border-radius:16px;overflow:hidden;background:#000;margin:6px 0 12px}
+.cl-scan img{display:block;width:100%;max-height:300px;object-fit:cover}
+.cl-scan .ln{position:absolute;left:0;right:0;height:70px;top:-70px;background:linear-gradient(180deg,transparent,rgba(217,119,87,.15) 60%,rgba(255,170,130,.85) 96%,#fff);box-shadow:0 8px 24px rgba(217,119,87,.6);animation:clscan 1.8s cubic-bezier(.45,0,.55,1) infinite}
+@keyframes clscan{0%{top:-70px}100%{top:100%}}
+.cl-scan .tag{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(10,14,18,.72);color:#fff;border-radius:99px;padding:7px 14px;font-weight:600;font-size:13px;white-space:nowrap}
+.mv-scan{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border-radius:12px;margin-top:8px;background:linear-gradient(135deg,rgba(217,119,87,.16),rgba(193,95,60,.1));border:1px solid rgba(217,119,87,.45);color:var(--text-1);text-align:left}
+.mv-scan b{display:block;font-size:14px}.mv-scan span{font-size:12px;color:var(--text-2)}
+@media(prefers-reduced-motion:reduce){.cl-scan .ln,.cl-dots i,.cl-mic.on{animation:none}}
